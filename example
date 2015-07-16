@@ -1,0 +1,13 @@
+from subprocess import call
+
+
+call("""python rssmaker.py\
+    -n "The Warrens of Oric the Awesome"\
+    -f "C:/wamp/www/oric.xml"\
+    -u "http://www.bay12forums.com/smf/index.php?topic=121809.msg6291947"\
+    -b "{'id':'msg_6291947'}"\
+    -c "{'class_':'bbc_link'}"\
+    -l "item['href']"\
+    -d "str(item) + str(item.next_sibling)"\
+    -t "item.get_text()"\
+""")
