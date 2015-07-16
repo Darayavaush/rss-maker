@@ -17,7 +17,7 @@ parser.add_argument('-c', '--criteria', required=True, help='criteria of picking
 parser.add_argument('-d', '--description', help='description scheme of individual items')
 parser.add_argument('-l', '--link', required=True, help='link scheme of individual items. Base item name is \'item\'')
 parser.add_argument('-t', '--title', help='title scheme of individual items')
-parser.add_argument('-q', '--limit', help='number of items to take. >0 = take items from beginning, otherwise from end')
+parser.add_argument('-q', '--limit', help='number of items to take. >0 = take items from beginning, otherwise from end', default=-50)
 parser.add_argument('-x', '--cookies', help='cookies to include with the request')
 parser.add_argument('-o', '--overwrite', help='don\'t fetch existing feed', action="store_true")
 
@@ -39,11 +39,10 @@ else:
 soup = BeautifulSoup(requests.get(args.url, cookies=eval(args.cookies)).text)
 if args.base:
     soup = soup.find(**eval(args.base))
-limit = args.limit if args.limit else -50
-if limit > 0:
-    newitems = soup(**eval(args.criteria))[:limit]
+if args.limit > 0:
+    newitems = soup(**eval(args.criteria))[:args.limit]
 else:
-    newitems = soup(**eval(args.criteria))[limit:]
+    newitems = soup(**eval(args.criteria))[args.limit:]
 for item in newitems:
     link = eval(args.link)
     if link not in oldlinks:
