@@ -1,0 +1,13 @@
+from subprocess import call
+
+
+call("""python rssmaker.py\
+    -n "Youtube Subscriptions"\
+    -f "C:/wamp/www/youtube.xml"\
+    -u "https://www.youtube.com/feed/subscriptions"\
+    -c "{'class_':'yt-lockup-dismissable'}"\
+    -l "'http://youtube.com' + item.find(class_='yt-lockup-title').find(class_='spf-link')['href']"\
+    -d "'<img src=' + item.find(class_='yt-thumb').contents[0]['src'] + '><br>' + item.find(class_='yt-lockup-description').text"\
+    -t "item.find(class_='yt-lockup-title').find(class_='spf-link')['title']"\
+    -x "{'SID':'***', 'SSID': '***'}"\
+""")
