@@ -18,7 +18,7 @@ parser.add_argument('-d', '--description', help='description scheme of individua
 parser.add_argument('-l', '--link', required=True, help='link scheme of individual items. Base item name is \'item\'')
 parser.add_argument('-t', '--title', help='title scheme of individual items')
 parser.add_argument('-q', '--limit', help='number of items to take. >0 = take items from beginning, otherwise from end', default=-50)
-parser.add_argument('-x', '--cookies', help='cookies to include with the request')
+parser.add_argument('-x', '--cookies', help='cookies to include with the request', default='{}')
 parser.add_argument('-o', '--overwrite', help='don\'t fetch existing feed', action="store_true")
 args = parser.parse_args()
 
@@ -45,13 +45,13 @@ if args.limit > 0:
 else:
     newitems = soup(**eval(args.criteria))[args.limit:]
 for item in newitems:
-    link = eval(args.link)
+    link = str(eval(args.link))
     if link not in oldlinks:
         items.append(
             PyRSS2Gen.RSSItem(
                 title=eval(args.title) if args.title else item,
                 link=link,
-                description=eval(args.description) if args.description else ''
+                description=str(eval(args.description)) if args.description else ''
                 )
         )
 # print(newitems)
