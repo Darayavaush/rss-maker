@@ -3,7 +3,7 @@ import PyRSS2Gen
 import datetime
 import argparse
 import requests
-from pyquery import PyQuery
+from bs4 import BeautifulSoup
 import re
 import feedparser
 
@@ -16,9 +16,8 @@ parser.add_argument('-b', '--base', help='narrow the lookup to the contents of t
 parser.add_argument('-c', '--criteria', required=True, help='criteria of picking the base items')
 parser.add_argument('-d', '--description', help='description scheme of individual items')
 parser.add_argument('-l', '--link', required=True, help='link scheme of individual items. Base item name is \'item\'')
-parser.add_argument('-w', '--filter', help='additional filtering. Base item name is \'item\'')
 parser.add_argument('-t', '--title', help='title scheme of individual items')
-parser.add_argument('-q', '--limit', help='number of items to take. >0 = take items from beginning, otherwise from end')
+parser.add_argument('-q', '--limit', help='number of items to take. >0 = take items from beginning, otherwise from end', default=-50)
 parser.add_argument('-x', '--cookies', help='cookies to include with the request', default='{}')
 parser.add_argument('-o', '--overwrite', help='don\'t fetch existing feed', action="store_true")
 parser.add_argument('-a', '--auth', help='dictionary containing authorization information')
@@ -42,20 +41,19 @@ else:
 
 
 
-pq = PyQuery(requests.get(args.url, cookies=eval(args.cookies)).text)
+soup = BeautifulSoup(requests.get(args.url, cookies=eval(args.cookies)).text)
 if args.base:
-    pq = pq(eval(args.base))
-
-newitems = list(pq(eval(args.criteria)).items())
-
-if args.limit:
-    args.limit = int(args.limit)
-    if args.limit > 0:
-        newitems = newitems[:args.limit]
-    elif args.limit < 0:
-        newitems = newitems[args.limit:]
-    else:
-        newitems = list(pq(eval(args.criteria)).items())
+    soup = soup.find(**eval(args.base))
+args.limit = int(args.limit)
+if args.limit > 0:
+    newitems = soup(**eval(args.criteria))[:args.limit]
+elif args.limit < 0:
+    newitems = soup(**eval(args.criteria))[args.limit:]
+else:
+    newitems = soup(**eval(args.criteria))
+if args.debug:
+    print(newitems)
+    exit()
 for item in newitems:
     link = str(eval(args.link))
     # print(link)
@@ -68,20 +66,16 @@ for item in newitems:
             PyRSS2Gen.RSSItem(
                 title=str(eval(args.title)) if args.title else item,
                 link=link,
+                # description= ''
                 description=description
                 )
         )
 
-
-items = [item for item in items if eval(args.filter)]
-
-if args.debug:
-    for item in items:
-        print(item.title)
-        print(item.link)
-    #     print(eval(args.filter))
-    # exit()
-    # print(items)
+        if args.debug:
+            print(items[-1].title)
+        #     with open('temp.html', 'w', encoding='utf8') as f:
+        #         f.write(requests.get(args.url, cookies=eval(args.cookies)).text)
+        #         exit()
 
 rss = PyRSS2Gen.RSS2(
     title=args.name,
